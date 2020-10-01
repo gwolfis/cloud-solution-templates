@@ -1,11 +1,32 @@
 # Deploy BIG-IP on GCP with GDM without Internet access
 
-**Use Case Scenario**
+## Contents
+
+- [Deploy BIG-IP on GCP with GDM without Internet access](#deploy-big-ip-on-gcp-with-gdm-without-internet-access)
+  - [Contents](#contents)
+  - [Introduction](#introduction)
+  - [Solution Description](#solution-description)
+    - [Network](#network)
+    - [DNS](#dns)
+    - [Google Cloud Storage](#google-cloud-storage)
+    - [BIG-IP GDM template](#big-ip-gdm-template)
+  - [Testing](#testing)
+  - [Conclusion](#conclusion)
+  - [Troubleshooting](#troubleshooting)
+  - [References](#references)
+
+```
+Before diving into reading this article let me give a special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting.
+```
+
+## Introduction
 Last week I got involved in a customer use cases where the challenge was to deploy F5 BIG-IP in Google Cloud Platform by using Google Deployment Manager. Yes, using our F5 Cloud Solutions templates to deploy F5 BIG-IP into GCP.
 What in that case is easier than grab the template of choice fill in this template and do a “gcloud deployments-manager create…” to deploy though GCP CLI and before you know it, your deployment is up and running, ready to be used.
 But no, not this time, since the security requirements for this customer are that there is no Internet access which can be used at runtime to get our cloud-libs and assorted packages. “Houston, we have problem!”.
 
 ![](GCP/png/diagram.png)
+
+## Solution Description
 
 The only way this solution can work is where you are able to download the F5 packages from a GCP local storage like Google Cloud Storage (GCS). This implies that the GDM template must have defined how to should reach out to this GCS to get to the packages and this can only be done from within the template definition through the use of a service account with the right authority. Another point to recon with is API traffic, normally the GDM template reaches out to *.googleapis.com and no Internet means that this needs to get resolved different and finally the VPC networks connecting the BIG-IP VM need to have access to the API and be able to reach Google API services.
 
@@ -20,9 +41,7 @@ The Standalone-3NIC GDM template its original existence can found here: https://
 
 Quite a list so let’s started straight away.
 
-Solution Description
-
-**Network**
+### Network
 
 **Private Google Access** is used to allow VMs without an external IP address to be able to send packets to external IP addresses used by Google APIs and services. For getting the isolated use case to work, we need all our three pre-defined subnets: external, management and internal to have Private Google Access enabled.
 
@@ -35,7 +54,7 @@ Now we are already in the subnet section, let’s create the custom route as wel
 
 This custom route will have a destination to the external addresses of Google API whose next hop is the default Internet gateway. Traffic send to Google APIs 199.36.153.4/30 will remain within Google’s network.
 
-**DNS**
+### DNS
 
 Next, we need to create the **private DNS zone**. 
 I have noticed that the GCP GUI might through you an error when creating the CNAME record and ‘restricted’ A records. So, let’s switch to gcloud and complete this task.
@@ -71,7 +90,7 @@ Finally, execute the transaction.
 ```
 gcloud dns record-sets transaction execute --zone=googleapis
 ```
-**Google Cloud Storage**
+### Google Cloud Storage
 
 Now the network and DNS piece are ready, it is time to create a GCS bucket. 
 
@@ -80,7 +99,7 @@ Now the network and DNS piece are ready, it is time to create a GCS bucket.
 The GCS bucket is used to store the cloud-libs and F5 automation toolchain packages. In this example f5-cloud-libs-gce, f5-cloud-libs and the AS3 .rpm are downloaded and added to the bucket.
 Be sure to add a service account to the defined bucket which is allowed to grab the files from GCS.
 
-**BIG-IP GDM template**
+### BIG-IP GDM template
 
 The final piece is to customize the GDM template and this was the hardest piece to accomplish.
 The used template is f5-existing-stack-payg-3nic-bigip though the customer use case requested BYOL. But using PAYG is just handy for the testing purposes.
@@ -161,7 +180,7 @@ For this purpose, libraries have been added to the .py file:
 
 Now everything is ready and configured.
 
-**Testing**
+## Testing
 
 Let’s test it by deploying the GDM template in gcloud via:
 gcloud deployment-manager deployments create gert-bigip-3nic --config f5-existing-stack-payg-3nic-bigip.yaml --description "gert-bigip-3nic"
@@ -181,11 +200,11 @@ When the BIG-IP GUI opens...
 
 Congratulations, you have succesfully deployed a BIG-IP through a GDM template in an isolated situation.
 
-**Conclusion**
+## Conclusion
 
 When a customer use case requires BIG-IP isolation from the Internet, don’t fear no more. This can be done as the above solution has shown. GCP does have its mechanisms and capabilities available for you to support and facilitate this isolated use case with GDM templates.
 
-**Troubleshooting**
+## Troubleshooting
 
 What if things don’t work. Here are some tips to check to understand if things are going wrong and where to look.
 
@@ -487,6 +506,9 @@ As a result, you should see the file getting downloaded.
 
 When this action returns a 403, your authentication is not correct and you should check the authorization of your service account for your GCS bucket.
 
-
+## References
+ - [Configuring Private Google Access](https://cloud.google.com/vpc/docs/configure-private-google-access)
+ - [Setting up private connectivity to Google APIs and services](https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity)
+ - 
 
 
