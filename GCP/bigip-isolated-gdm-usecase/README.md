@@ -2,6 +2,8 @@
 
 ## Contents
 
+- [Deploy BIG-IP on GCP with GDM without Internet access](#deploy-big-ip-on-gcp-with-gdm-without-internet-access)
+  - [Contents](#contents)
   - [Introduction](#introduction)
   - [Solution Description](#solution-description)
     - [Network](#network)
@@ -13,16 +15,18 @@
   - [Troubleshooting](#troubleshooting)
   - [References](#references)
 
-
-(*Special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting.)*
+(*Special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting. Read his article about isolated BIG-IPs and CFE in GCP using Terraform: https://github.com/memes/f5-google-bigip-isolated-vpcs)*
 
 
 ## Introduction
 Last week I got involved in a customer use cases where the challenge was to deploy F5 BIG-IP in Google Cloud Platform by using Google Deployment Manager. Yes, using our F5 Cloud Solutions templates to deploy F5 BIG-IP into GCP.
-What in that case is easier than grab the template of choice fill in this template and do a “gcloud deployments-manager create…” to deploy though GCP CLI and before you know it, your deployment is up and running, ready to be used.
-But no, not this time, since the security requirements for this customer are that there is no Internet access which can be used at runtime to get our cloud-libs and assorted packages. “Houston, we have problem!”.
 
-![](GCP/png/diagram.png)
+What in that case is easier than grab the template of choice fill in this template and do a “gcloud deployments-manager create…” to deploy though GCP CLI and before you know it, your deployment is up and running, ready to be used.
+But no, not this time, since the security requirements for this customer are that there is no Internet access which can be used at runtime to get our cloud-libs and assorted packages. 
+
+“Houston, we have problem!”.
+
+![](png/diagram.png)
 
 ## Solution Description
 
@@ -43,12 +47,12 @@ Quite a list so let’s started straight away.
 
 **Private Google Access** is used to allow VMs without an external IP address to be able to send packets to external IP addresses used by Google APIs and services. For getting the isolated use case to work, we need all our three pre-defined subnets: external, management and internal to have Private Google Access enabled.
 
-![](GCP/png/private-google-access.png)
+![](png/private-google-access.png)
 
 This makes that each subnet is able to reach the GCS.
 Now we are already in the subnet section, let’s create the custom route as well.
 
-![](GCP/png/google-api-route.png)
+![](png/google-api-route.png)
 
 This custom route will have a destination to the external addresses of Google API whose next hop is the default Internet gateway. Traffic send to Google APIs 199.36.153.4/30 will remain within Google’s network.
 
@@ -92,7 +96,7 @@ gcloud dns record-sets transaction execute --zone=googleapis
 
 Now the network and DNS piece are ready, it is time to create a GCS bucket. 
 
-![](GCP/png/gcs.png)
+![](png/gcs.png)
 
 The GCS bucket is used to store the cloud-libs and F5 automation toolchain packages. In this example f5-cloud-libs-gce, f5-cloud-libs and the AS3 .rpm are downloaded and added to the bucket.
 Be sure to add a service account to the defined bucket which is allowed to grab the files from GCS.
@@ -185,7 +189,7 @@ gcloud deployment-manager deployments create gert-bigip-3nic --config f5-existin
 
 After 2 – 3 minutes you will see:
 
-![](GCP/png/deployment-completed.png) 
+![](png/deployment-completed.png) 
 Let’s grab the GCP console and go your deployed VM and select the BIG-IP. In the log section check out ‘Serial port 1 (console) read through the log. (if you can’t wait)
 
 After a minute of 5, grab the management public IP address (NIC1) and open SSH to add a password. Your SSH session should include an SSH private key which has been generated.
@@ -491,7 +495,7 @@ bigip1-gert-bigip-3nic login: mcpd has reached 'running' state
 ```
 curl -sf -H 'Metadata-Flavor: Google' 'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token' | jq -r .access_token
 ```
-![](GCP/png/get-token.png) 
+![](png/get-token.png) 
 
 use the token to download a file form GCS:
 ```
@@ -500,13 +504,14 @@ curl -fL --retry 20 -o /config/cloud/gce/f5-appsvcs-3.20.0-3.noarch.rpm -H 'Auth
  
 As a result, you should see the file getting downloaded. 
 
-![](GCP/png/download-package.png)
+![](png/download-package.png)
 
 When this action returns a 403, your authentication is not correct and you should check the authorization of your service account for your GCS bucket.
 
 ## References
  - [Configuring Private Google Access](https://cloud.google.com/vpc/docs/configure-private-google-access)
  - [Setting up private connectivity to Google APIs and services](https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity)
+ - [BIG-IP 3NIC PAYG Existing GDM template](https://github.com/F5Networks/f5-google-gdm-templates/tree/master/supported/standalone/3nic/existing-stack/payg)
  - 
 
 
