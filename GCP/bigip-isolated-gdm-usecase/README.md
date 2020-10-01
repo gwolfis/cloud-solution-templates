@@ -189,7 +189,8 @@ gcloud deployment-manager deployments create gert-bigip-3nic --config f5-existin
 
 After 2 – 3 minutes you will see:
 
-![](png/deployment-completed.png) 
+![](png/deployment-completed.png)
+
 Let’s grab the GCP console and go your deployed VM and select the BIG-IP. In the log section check out ‘Serial port 1 (console) read through the log. (if you can’t wait)
 
 After a minute of 5, grab the management public IP address (NIC1) and open SSH to add a password. Your SSH session should include an SSH private key which has been generated.
@@ -512,6 +513,6 @@ When this action returns a 403, your authentication is not correct and you shoul
  - [Configuring Private Google Access](https://cloud.google.com/vpc/docs/configure-private-google-access)
  - [Setting up private connectivity to Google APIs and services](https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity)
  - [BIG-IP 3NIC PAYG Existing GDM template](https://github.com/F5Networks/f5-google-gdm-templates/tree/master/supported/standalone/3nic/existing-stack/payg)
- - 
+ - [f5-google-bigip-isolated-vpcs](https://github.com/memes/f5-google-bigip-isolated-vpcs)
 
 
