@@ -15,7 +15,7 @@
   - [Troubleshooting](#troubleshooting)
   - [References](#references)
 
-(*Special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting. Read his article about isolated BIG-IPs and CFE in GCP using Terraform: https://github.com/memes/f5-google-bigip-isolated-vpcs)*
+(*Special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, supporting me in adding the gcURLs script and show me some decent troubleshooting. Read his article about isolated BIG-IPs and CFE in GCP using Terraform: https://github.com/memes/f5-google-bigip-isolated-vpcs)*
 
 
 ## Introduction
