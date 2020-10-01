@@ -2,8 +2,6 @@
 
 ## Contents
 
-- [Deploy BIG-IP on GCP with GDM without Internet access](#deploy-big-ip-on-gcp-with-gdm-without-internet-access)
-  - [Contents](#contents)
   - [Introduction](#introduction)
   - [Solution Description](#solution-description)
     - [Network](#network)
@@ -15,9 +13,9 @@
   - [Troubleshooting](#troubleshooting)
   - [References](#references)
 
-```
-Before diving into reading this article let me give a special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting.
-```
+
+(*Special thanks to Matthew Emes, F5 Global SA, for being my shadow to get this solution to work, support in adding the gcURLs script and show me some decent troubleshooting.)*
+
 
 ## Introduction
 Last week I got involved in a customer use cases where the challenge was to deploy F5 BIG-IP in Google Cloud Platform by using Google Deployment Manager. Yes, using our F5 Cloud Solutions templates to deploy F5 BIG-IP into GCP.
