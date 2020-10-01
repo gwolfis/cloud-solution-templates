@@ -205,7 +205,11 @@ Congratulations, you have succesfully deployed a BIG-IP through a GDM template i
 
 ## Conclusion
 
-When a customer use case requires BIG-IP isolation from the Internet, don’t fear no more. This can be done as the above solution has shown. GCP does have its mechanisms and capabilities available for you to support and facilitate this isolated use case with GDM templates.
+When a customer use case requires BIG-IP isolation from the Internet, don’t fear no more. This can be done as the above solution has shown.
+
+Google Cloud Platform provides capabilities to redirect network and DNS to restricted.googleapi.com, making that an isolated VM is able to leverage the Google API and that’s exactly what the customized GDM template needs to start functioning. Deploying a BIG-IP where packages get downloaded from the local Google Cloud Storage and install to make that BIG-IP is up in running in just a few minutes.
+
+Once the BIG-IP is in a running state it can be used to deploy any application service or application security to deliver available and protected apps.
 
 ## Troubleshooting
 
